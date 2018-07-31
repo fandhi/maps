@@ -3,6 +3,9 @@ html, body {
     margin: 0;
     padding: 0;
 }
+.maps .col-5 {
+    height: 600px;
+}
 #map {
     height: 100%;
     position: inherit !important;
@@ -17,12 +20,11 @@ html, body {
     font-size: 15px;
     font-weight: 300;
     height: 29px;
-    margin-left: 117px;
     margin-top: 10px;
     outline: none;
     padding: 0 11px 0 13px;
     text-overflow: ellipsis;
-    width: 400px;
+    width: 90%;
 }
 
 .controls:focus {
@@ -32,6 +34,7 @@ html, body {
     margin-right: 12px;
     padding-bottom: 12px;
     position: absolute;
+    width: 100%;
     z-index: 1;
 }
 
