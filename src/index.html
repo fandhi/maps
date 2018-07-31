@@ -1,14 +1,152 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Maps</title>
-  <base href="/">
+    <head>
+        <meta charset="utf-8">
+        <title>Maps</title>
+        <base href="/">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+    </head>
+    <body>
+    <app-root>
+        
+    <script>
+        function initMap() {
+            var crosshairShape = {coords: [0, 0, 0, 0], type: 'rect'};
+            var latlng = new google.maps.LatLng(-6.1961739, 106.808033);
+            var myOptions = {
+                zoom: 15,
+                center: latlng,
+                //draggableCursor:'crosshair',
+                apTypeId: google.maps.MapTypeId.ROADMAP
+            };
+
+            var map = new google.maps.Map(document.getElementById("map"), myOptions);
+
+            var icon = {
+                url: "assets/33622.svg", // url
+                scaledSize: new google.maps.Size(30, 30) // scaled size
+                        //origin: new google.maps.Point(0,0), // origin
+                        //anchor: new google.maps.Point(0, 0) // anchor
+            };
+
+            var marker = new google.maps.Marker({
+                map: map,
+                icon: icon //,
+                        //shape: crosshairShape,
+                        //draggable: true
+            });
+
+            var geocoder = new google.maps.Geocoder();
+
+            var input = document.getElementById('pac-input');
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo('bounds', map);
+            autocomplete.setFields(['address_components', 'geometry', 'icon', 'name']);
+
+            var infowindow = new google.maps.InfoWindow();
+            var infowindowContent = document.getElementById('infowindow-content');
+            infowindow.setContent(infowindowContent);
+
+            autocomplete.addListener('place_changed', function () {
+                infowindow.close();
+                marker.setVisible(false);
+                var place = autocomplete.getPlace();
+                if (!place.geometry) {
+                    // User entered the name of a Place that was not suggested and
+                    // pressed the Enter key, or the Place Details request failed.
+                    window.alert("No details available for input: '" + place.name + "'");
+                    return;
+                }
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(15);
+                }
+                marker.setPosition(place.geometry.location);
+                marker.setVisible(true);
+
+                var address = '';
+                if (place.address_components) {
+                    address = [
+                        (place.address_components[0] && place.address_components[0].short_name || ''),
+                        (place.address_components[1] && place.address_components[1].short_name || ''),
+                        (place.address_components[2] && place.address_components[2].short_name || '')
+                    ].join(' ');
+                }
+
+                infowindowContent.children['place-icon'].src = place.icon;
+                infowindowContent.children['place-name'].textContent = place.name;
+                infowindowContent.children['place-address'].textContent = address;
+                infowindow.open(map, marker);
+            });
+
+            google.maps.event.addListener(map, 'dragend', function (evt) {
+                geocoder.geocode({
+                    'latLng': marker.getPosition()
+                }, function (results, status) {
+                    //debugger;
+                    if (status === google.maps.GeocoderStatus.OK) {
+                        if (results[0]) {
+                            infowindow.setContent(results[0].formatted_address);
+                            infowindow.open(map, marker);
+                            $('#pac-input').val(results[0].formatted_address);
+                        }
+                    }
+                });
+            });
+
+
+            google.maps.event.addListener(map, 'dragstart', function (evt) {
+                /*document.getElementById('current').innerHTML = '<p>Currently dragging marker...</p>';
+                 geocoder.geocode({
+                 'latLng': evt.latLng
+                 }, function(results, status) {
+                 if (status == google.maps.GeocoderStatus.OK) {
+                 if (results[0]) {
+                 //alert(results[0].formatted_address);
+                 new google.maps.InfoWindow({
+                 content: results[0].formatted_address
+                 }).open(map,marker);
+                 }
+                 }
+                 });*/
+
+                /*var lat = marker.getPosition().lat();
+                 var lng = marker.getPosition().lng();
+               
+                 alert(lat+" "+lng);*/
+            });
+
+
+            /*google.maps.event.addListener(map,'center_changed', function() {
+             // 3 seconds after the center of the map has changed, pan back to the
+             // marker.
+             window.setTimeout(function() {
+             map.panTo(marker.getPosition());
+           
+             geocoder.geocode({
+             'latLng': marker.getPosition()
+             }, function(results, status) {
+             if (status == google.maps.GeocoderStatus.OK) {
+             if (results[0]) {
+             infowindow.setContent(results[0].formatted_address);
+             infowindow.open(map,marker);
+             }
+             }
+             });
+             }, 100);
+             });*/
+
+            marker.bindTo('position', map, 'center');
+        }
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeZbkt0MZIToYdcVijXLA67n2GPulFS3s&libraries=places&callback=initMap" async defer></script>
+    </app-root>
 </body>
 </html>
